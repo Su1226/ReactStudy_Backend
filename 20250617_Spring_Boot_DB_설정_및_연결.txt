@@ -1,0 +1,57 @@
+Springboot로 DB를 연결하는 프로젝트 설정하기.
+
+1. 새로운 프로젝트를 Spring Boot로 설정.
+2. 이름을 지정한다.
+3. Git 저장소 생성 버튼 클릭
+4. 언어는 Java, 타입은 Maven
+5. Java는 21버전으로 선택하고 다음으로 넘어간다. 
+6. Spring Boot 버전은 3.4.6으로 한다. (MyBits 사용을 위해서)
+7. 종속성 선택
+- Spring Boot DevTools
+- Lombok
+- Spring Web
+- Spring Security
+- JDBC API
+- MySQL Driver
+- MyBits Framework
+- Validation 
+- Java Mail Sender 
+8. 위 종속성들 선택 후 생성
+9. 프로젝트 생성 후, src -> main -> resources 폴더 안에 application.yml으로
+   파일명 변경.
+10. DB연결을 위한 설정 -> mysql workbench에서 db 생성
+11. application.yml에서 DB를 연결 
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/auth_study_db
+    username: root
+    password: 1q2w3e4r
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  type-aliases-package: com.korit.authstudy.mapper.dto
+
+ // 주의! 구역을 주의해서 넣을 것.
+ // 주의! 오타
+ // main java에서 authstudy.mapper.dto라는 폴더를 만들어주고, 
+ // main resource에서 mapper라는 폴더를 만들어 준다.
+
+12. pom.xml에 swaager를 종속할 것.
+<dependency>
+	<groupId>org.springdoc</groupId>
+	<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+	<version>2.5.0</version>
+</dependency>
+
+13. Http 통신 프로토콜 vscode로 다운로드 -> $ npm install axios
