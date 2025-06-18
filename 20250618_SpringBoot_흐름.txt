@@ -1,0 +1,111 @@
+1. 오라클 클라우드 -> https://www.oracle.com/kr/cloud/free/
+
+2. 무엇을 먼저 만들어야 하는가?
+- 프론트가 post 요청을 날렸을 때, DTO로 보낸다.
+- 그렇기 때문에 Controller와 DTO를 먼저 생성한다.
+- DTO에서는 프론트에서 보낸 요청과 같아야 하기 때문에, DTO에 선언하는 변수는 프론트에서 보내는 변수명과 같아야 한다.
+- 즉, data와 dto의 구조가 같아야 하고, 요청이 올 때마다 DTO 객체가 생성된다.
+
+- Controller에 URL이 경로가 있기 때문에, 요청이 들어올 때 해당 Mapping 주소를 찾아간다.
+- JSON객체가 들어올 때만 Controller의 매개변수로 @RequsetBody를 넣는다. (POST, PUT)
+
+// -------------------------------------------------------------------------------//
+
+1. 요청이 들어오면 URL이 있는, Controller로 들어간다.
+- 즉, 제일 먼저 만드는건 Controller.
+- Controller에서 응답을 하기 때문에, 응답을 하는 return 안에서 다른 함수로 기능을 다 빼놓았다.
+- 그것이 Service와 Repository이다.
+2. DTO는 프론트에서 보내는 데이터를 담기 위한 것이다.
+- 두 번째로 만드는게 DTO이며, DTO는 프론트의 변수와 맞아야 한다.
+- Data Transfer Object(데이터 전송 객체)
+- Service에서 Repository를 부르면서 Entity를 생성한다.
+- 즉, Entity도 DTO이다.
+3. Service 계층 호출
+- Service가 세번째로 만드는 것.
+- Repository와 연결되어 있다.
+- DB에 넣은 SQL을 저장하는 과정.
+4. Repository 생성
+- Repository는 네번째로 만드는 것이며, DB와 연결되어있다.
+- 즉, DB에 SQL을 넣는 과정.
+5. Entity
+- Service와 Repository 사이에서 DTO를 의미한다.
+- Entity는 DB와 구조가 맞아야 한다.
+- 만약, 컬럼명과 변수명이 다르면 @Colum(name="")으로 데이터 베이스 컬럼명과 갖게 한다.
+
+// -------------------------------------------------------------------------------//
+
+우선 프론트의 형태를 잡으면서 DB를 정규화 하면 더 편하다.
+
+1. DB의 테이블을 만들자 마자 만들어야 하는 것은 Entity이다.
+- Entity의 @Table(name="")을 바로 작성할 것.
+- DB의 Column명과 Entity의 변수명이 같은지를 확인한다.
+- Entity는 무조건 id가 필요하기 때문에, @Id를 해주고 @Column(name="DB의 ID Column명")
+- @GeneratedValue(strategy = GenerationType.IDENTITY)로 Auto Implement가 가능하게 한다.
+
+2. DTO를 생성한다.
+- 프론트에서 보내는 값을 받을 변수들을 만든다.
+- 변수들은 프론트에서 지정한 변수명과 같아야 한다.
+- 해당 DTO를 받을 수 있는 Controller를 만들어야 한다.
+
+3. Controller를 생성한다.
+- @RestController는 필수로 붙인다.
+- public ResponseEntity<?> 함수명(DTO dto) {
+    return ResponseEntity.ok(null);
+  }
+- 프론트에서 보내는 @--Mapping 애노테이션이 필요하다.
+- Post나 Put과 같이 JSON으로 받는 경우, 매개변수에 @RequestBody를 필수로 붙여야 한다.
+
+4. Service를 생성한다.
+- @Service로 Component를 등록한다.
+- Service 안에 메소드를 만들어준다.
+- 이때부터 Controller에서 Service를 호출할 수 있게 된다.
+- 싱글톤을 쓰는 이유 : 계속해서 생성하는 것을 방지하고, 공동으로 사용하기 위해서 -> Spring Boot에서는 IoC이다.
+
+5. Controller에 Service를 의존성 주입을 해준다.
+- Controller에 private final Service service;를 넣어준다.
+- 생성자를 직접 작성하지 않고, @RequiredArgsConstructor를 붙여서, 최초의 한 번 초기화 해주며 생성자를 생성해준다.
+- final이 붙지 않으면 @AllArgsConstructor가 되기 때문에 final을 붙여줘야 한다.
+- 그렇다면 @RequiredArgsConstructor을 쓰는 이유는?
+- 무조건 한 번은 초기화 되어야 하는 변수들이 있기 때문에,
+- 계속해서 코드를 수정하는 것보다 해당 애노테이션을 쓴다.
+- 또한 다른 변수 중 준비가 되지 않은 경우, 사용할 수 없기 때문에 Required를 사용한다.
+
+6. Serivce가 Controller와 Repository를 연결하는 역할을 하도록 한다.
+- Controller에서 매개변수로 Service로 데이터를 전달한다.
+- DB에 저장하기 위해 가져온 데이터를 Member Entity에 넣어준다.
+
+7. Repository를 생성한다.
+- JpaRepository<> 안에 save()라는 함수가 있다.
+- <Entity 명, id 자료형>
+- repository.save(dto)를 하게 되면, DB에 저장이 될 수 있도록 한다.
+
+하지만 여기까지 했을 때는 DB에 저장이 되지 않는다.
+
+8. Entity에서 @AllArgsConstructor가 필요하다.
+- 그러나 @AllArgsConstructor는 혼자 있어서는 안된다.
+- @NoArgsConstructor를 붙여줘야 한다.
+
+9. DTO에서 toEntity() 함수를 만들어서 저장하기 편하게 하다.
+- Service 측에서 set, get으로 하나하나 줄 필요가 없다.
+- DTO에서 넣으면 된다.
+- DTO에서 Builder로 편하게 변환하기 위해서 Entity 객체에 @Builder를 붙여줘야 한다.
+- @Builder는 무조건 @AllArgsConstructor가 필요하다.
+- 추후 조회를 위해서 @NoArgsConstructor가 필요하다.
+
+10. Service에서 암호화를 진행하고 DB에 저장한다.
+- 값을 넘겨줄 때 dto.toEntitiy(passwordEncoder) 형태로 값을 넘겨준다.
+
+
+// -------------------------------------------------------------------------------//
+
+
+[ 자주 발생하는 오류 ]
+1. 경로가 안되는 경우, 프론트와 백 둘 다 테이블명, db명이 맞는지 확인한다.
+2. field가 없다는 오류는 DB나 Entity의 변수명을 확인해야 한다.
+3. 변수에 null이 들어갈 수 없다라는 오류는, 값이 들어오지 않았으므로 Controller의 DTO부터 확인한다.
+   -> 문제가 있다면, 프론트 쪽에서 확인해본다.
+   -> 만약 문제가 없다면 Service 측에서 값을 못 받는 중이다.
+4. 500 오류는 Bean을 찾을 수 없어서 뜨는 오류. 필수 애노테이션을 넣지 않은 경우 뜨는 오류. 의존성 주입이 되지 않은 경우.
+5. 404는 주소가 맞는지 확인 할 것.
+6. 405는 메소드(GET, POST, PUT, DELETE)가 맞는지 확인해야 한다.
+
