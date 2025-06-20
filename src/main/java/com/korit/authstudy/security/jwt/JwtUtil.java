@@ -64,7 +64,7 @@ public class JwtUtil {
         return bearerToken.replaceFirst("Bearer ", "");
     }
 
-    public Claims getClaims(String token) {
+    public Claims getClaims(String token) throws JwtException{
         // Jwts.parser()는 만들어진 Token을 확인하는 메소드.
         JwtParserBuilder jwtParserBuilder = Jwts.parser();
         jwtParserBuilder.setSigningKey(KEY);

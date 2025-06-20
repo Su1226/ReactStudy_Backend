@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 public class JwtService {
 
     private final JwtUtil jwtUtil;
+    // 로그인을 확인하는 용도
 
     public LoginStatusDto validLoginAccessToken(String bearerToken) {
         if (!jwtUtil.isBearer(bearerToken)) {
