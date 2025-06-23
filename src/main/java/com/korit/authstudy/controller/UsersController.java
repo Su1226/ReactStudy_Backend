@@ -1,14 +1,14 @@
 package com.korit.authstudy.controller;
 
-import com.korit.authstudy.dto.JwtDto;
-import com.korit.authstudy.dto.LoginDto;
-import com.korit.authstudy.dto.UserRegisterDto;
+import com.korit.authstudy.dto.*;
+import com.korit.authstudy.exception.MyAccountException;
+import com.korit.authstudy.security.model.PrincipalUser;
 import com.korit.authstudy.security.service.JwtService;
 import com.korit.authstudy.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,9 +50,30 @@ public class UsersController {
     }
 
     @GetMapping("/principal")
-    public ResponseEntity<?> getPrincialUser() {
+    public ResponseEntity<?> getPrincipalUser() {
         return ResponseEntity.ok(SecurityContextHolder.getContext().getAuthentication());
     } // 비회원 계정으로 들어오는 경우.
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<?> modifyFullNameOrEmail(@PathVariable Integer userId, @RequestBody UserModifyDto dto) {
+        System.out.println(userId);
+        System.out.println(dto);
+        userService.modifyFullNameOrEmail(userId, dto);
+        return ResponseEntity.ok("변경 성공");
+    }
+
+    @PutMapping("/{userId}/password")
+    public ResponseEntity<?> modifyPassword(@PathVariable Integer userId, @RequestBody UserPasswordModifyDto dto, @AuthenticationPrincipal PrincipalUser principalUser) {
+        System.out.println(userId);
+        System.out.println(dto);
+        
+        if (!userId.equals(principalUser.getUserId())) {
+            throw new MyAccountException("본인의 계정만 변경할 수 있습니다.");
+        } // 해당 if문에 걸릴 시, ControllerAdivce 쪽에서 처리한다. 
+
+        userService.modifyPassword(dto, principalUser);
+        return ResponseEntity.ok("비밀번호 변경 성공");
+    }
 
 
 }

@@ -64,6 +64,8 @@ public class JwtAuthenticationFilter implements Filter {
                                     .userId(user.getId())
                                     .username(user.getUsername())
                                     .password(user.getPassword())
+                                    .fullName(user.getFullName())
+                                    .email(user.getEmail())
                                     .build();
 
                             // 변환된 PrincipalUser을 Authentication의 UsernamePasswordAuthenticationToken을 업 캐스팅 해서 값을 넣는다.
@@ -79,6 +81,7 @@ public class JwtAuthenticationFilter implements Filter {
                         }, () -> {
                             // 예외 처리
                             // UserEntity를 찾지 못한 경우 실행되는 부분
+                            // DB에서 사용자를 찾지 못한 경우 실행되는 부분
                             throw new AuthenticationServiceException("인증 실패");
                         });
             } catch (JwtException e) {

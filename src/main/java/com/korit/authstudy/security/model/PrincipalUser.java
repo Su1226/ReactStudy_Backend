@@ -19,8 +19,8 @@ public class PrincipalUser implements UserDetails {
     private String password;
     // @JsonIgnore는 JSON에서 password를 표시하지 않는다.
 
-
-
+    private String fullName;
+    private String email;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

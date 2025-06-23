@@ -1,6 +1,7 @@
 package com.korit.authstudy.controller;
 
 import com.korit.authstudy.exception.BearerValidException;
+import com.korit.authstudy.exception.MyAccountException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,4 +30,9 @@ public class ControllerAdvice {
     public ResponseEntity<?> jwtError(JwtException exception) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
     } // 못 쓰는 토큰의 경우. (기한이 끝나거나 위조된 경우)
+
+    @ExceptionHandler(MyAccountException.class)
+    public ResponseEntity<?> isNotMyAccount(MyAccountException exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
+    } // 자신의 계정이 아닌 다른 계정의 정보를 바꾸려고 할 때. -> 권한 없음.
 }
